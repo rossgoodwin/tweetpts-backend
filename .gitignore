@@ -1,0 +1,4 @@
+*.pyc
+do_auth.py
+templates/
+static/
