@@ -39,7 +39,13 @@ def hello():
     screennames, parties = zip(*map(lambda x: tuple(x.split(',')), screennames_parties))
 
     # 2D list
-    recent_tweets = map(get_recent_tweets, screennames)
+    try:
+        recent_tweets = map(get_recent_tweets, screennames)
+    except tweepy.TweepError:
+        recent_tweets = json.load( open(APP_PATH+'static/recent_tweets.json', 'r') )
+    else:
+        with open(APP_PATH+'static/recent_tweets.json', 'w') as outfile:
+            json.dump(recent_tweets, outfile)
 
     word_freqs = map(word_freq, recent_tweets)
 
@@ -61,7 +67,7 @@ def get_recent_tweets(screen_name):
 def word_freq(tweets):
     tweet_str = ' '.join(tweets).lower()
     new_str = ' '.join(filter(lambda x: not x.startswith('http'), tweet_str.split()))
-    tokens = filter(lambda x: not x in stopwords, re.findall(r"\b[\w']+\b", new_str))
+    tokens = filter(lambda x: not x in stopwords and len(x) > 3, re.findall(r"\b[\w']+\b", new_str))
     return Counter(tokens).most_common()
 
 if __name__ == "__main__":
